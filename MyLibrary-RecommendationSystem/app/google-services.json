@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "200004239807",
+    "firebase_url": "https://thesis-bd8c8-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "thesis-bd8c8",
+    "storage_bucket": "thesis-bd8c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200004239807:android:f2d8192ca3d3d898d2a10a",
+        "android_client_info": {
+          "package_name": "com.example.mylibrary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "200004239807-1f25crnvuumqkjpv74cvluk3kn6t20eg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAYX4IuXmdJZcPtrdAWgxCupWDUsVdxIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "200004239807-1f25crnvuumqkjpv74cvluk3kn6t20eg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

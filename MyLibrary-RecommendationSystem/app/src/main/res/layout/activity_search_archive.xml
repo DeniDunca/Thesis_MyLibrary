@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_app"
+    android:gravity="center"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".activities.SearchArchiveActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_archive"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/purple_200"
+            app:popupTheme="@style/PopupOverlay" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_archive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/search_marginStartEnd"
+        android:layout_marginTop="@dimen/search_marginTopBottom"
+        android:layout_marginEnd="@dimen/search_marginStartEnd"
+        android:layout_marginBottom="@dimen/search_marginTopBottom"
+        android:background="@drawable/white_border_button"
+        android:focusable="false"
+        app:closeIcon="@drawable/ic_clear"
+        app:iconifiedByDefault="false"
+        app:queryHint="@string/search"
+        app:searchHintIcon="@null"
+        app:searchIcon="@drawable/ic_search" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_archive_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/search_archive"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_no_archive"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/no_archive"
+        android:textColor="@color/text_color2"
+        android:textSize="@dimen/no_books_in_collection_text_size" />
+
+
+</LinearLayout>
