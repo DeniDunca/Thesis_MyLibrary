@@ -2,7 +2,9 @@ package com.example.mylibrary.database
 
 import android.app.Activity
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
+import com.example.mylibrary.R
 import com.example.mylibrary.activities.*
 import com.example.mylibrary.models.Archive
 import com.example.mylibrary.models.Book
@@ -14,6 +16,12 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ml.modeldownloader.CustomModel
+import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
+import com.google.firebase.ml.modeldownloader.DownloadType
+import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
+import org.tensorflow.lite.Interpreter
+import java.io.File
 
 
 class RealTimeDataBase {
@@ -578,5 +586,30 @@ class RealTimeDataBase {
         })
     }
 
+    /**
+     * Gets the recommended books from model form firebase ml and gets the books from realtime database
+     */
+    fun getRecommendedBooks(activity: MainActivity, isbnList: List<String>) {
+        val reference = database.getReference(Constants.ARCHIVE)
+
+        reference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val bookList = arrayListOf<Archive>()
+                for (bookSnapshot in snapshot.children) {
+                    val book = bookSnapshot.getValue(Archive::class.java)
+                    if (book != null && isbnList.contains(book.isbn)) {
+                        book.documentId = bookSnapshot.key.toString()
+                        bookList.add(book)
+                    }
+                }
+                bookList.sortByDescending { it.rating }
+                activity.populatesRecommendedList(bookList)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(activity, "Error reading archive: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 }

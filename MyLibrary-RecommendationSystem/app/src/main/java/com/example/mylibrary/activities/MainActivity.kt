@@ -3,13 +3,11 @@ package com.example.mylibrary.activities
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.res.AssetFileDescriptor
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -27,16 +25,13 @@ import com.example.mylibrary.utils.SwipeToAddCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ml.modeldownloader.CustomModel
 import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
 import com.google.firebase.ml.modeldownloader.DownloadType
 import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
 import de.hdodenhof.circleimageview.CircleImageView
 import org.tensorflow.lite.Interpreter
-import java.io.FileInputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
+import java.io.File
 
 class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -45,6 +40,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     }
 
     private lateinit var userId: String
+    private var interpreter : Interpreter? = null
+    private var prediction :  Array<Array<String>> = arrayOf(arrayOf(""))
+    private var modelFile : File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +52,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         setupActionBar()
 
         //get the bestsellers from database
-        getTopBooks()
+        //getTopBooks()
+        getRecommendedBooks()
 
         //sets the navigation menu to the nav view
         findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
@@ -64,8 +63,6 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         //gets the user data from fireStore
         RealTimeDataBase().loadUserData(this)
-
-
 
         //when clicked on the plus button adds a book by selecting from the two actions
         findViewById<FloatingActionButton>(R.id.fab_add_book).setOnClickListener {
@@ -88,8 +85,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 }
             }
             addBookDialog.show()
+
         }
+
     }
+
 
     /**
      * When burger icon is pressed the drawer menu toggles
@@ -155,6 +155,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 startActivityForResult(Intent(this, MyProfileActivity::class.java), MY_PROFILE_CODE)
             }
             R.id.nav_sign_out -> {
+                modelFile = null
+                interpreter = null
                 FirebaseAuth.getInstance().signOut()
                 val intent = Intent(this, IntroActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -247,6 +249,45 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         RealTimeDataBase().getFirstBestBooks(this)
     }
 
+    private fun getPredictionsFromFirebaseMLModel(userId: String, callback: (Array<Array<String>>) -> Unit) {
+        if (modelFile != null && interpreter != null) {
+            prediction = predict(interpreter!!, userId)
+            callback(prediction)
+        } else {
+            val conditions = CustomModelDownloadConditions.Builder().requireWifi().build()
+            FirebaseModelDownloader.getInstance()
+                .getModel("my_model3", DownloadType.LATEST_MODEL,conditions)
+                .addOnSuccessListener { model: CustomModel? ->
+                    modelFile = model?.file
+                    if (modelFile != null) {
+                        interpreter = Interpreter(modelFile!!)
+                        prediction = predict(interpreter!!, userId)
+                        callback(prediction)
+                    }
+                }
+                .addOnFailureListener {
+                    prediction = arrayOf(arrayOf("bye"))
+                    callback(prediction)
+                }
+        }
+    }
+
+    private fun predict(interpreter: Interpreter, userId: String): Array<Array<String>> {
+        val inputs = arrayOf(userId.toByteArray())
+        val output1 = Array(1) { FloatArray(10) }
+        val output2 = Array(1) { Array(10) { "" } }
+        val outputs = mutableMapOf<Int, Any>(0 to output1, 1 to output2)
+        interpreter.runForMultipleInputsOutputs(inputs, outputs)
+
+        return output2
+    }
+
+    private fun getRecommendedBooks() {
+        getPredictionsFromFirebaseMLModel(getCurrentUserId()) { predictions ->
+            val flattenedPredictions = predictions.flatten()
+            RealTimeDataBase().getRecommendedBooks(this, flattenedPredictions)
+        }
+    }
 
 
 

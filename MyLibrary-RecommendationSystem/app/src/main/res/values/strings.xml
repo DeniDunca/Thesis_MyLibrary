@@ -5,7 +5,7 @@
     <string name="add_button">add</string>
     <string name="update_button">UPDATE</string>
     <string name="intro_illustration">Intro Illustration</string>
-    <string name="let_s_get_started_text">Let\'s Get started</string>
+    <string name="welcome">Welcome to your virtual library!</string>
     <string name="intro_text_description">Create your own virtual library by searching and adding books to your personal list.</string>
     <string name="sign_in">SIGN IN</string>
     <string name="sign_up">SIGN UP</string>
