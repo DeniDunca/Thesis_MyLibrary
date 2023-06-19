@@ -2,7 +2,11 @@
 Kotlin Aplication with FireStore Database 
 Application Workflow:
 
-https://user-images.githubusercontent.com/61636465/233196075-493b6dca-8e13-443c-9e97-8c4b57c0d6b9.mp4
+
+
+https://github.com/DeniDunca/Thesis_MyLibrary/assets/61636465/c3892ce4-718a-48bb-83b6-778521697ba7
+
+
 
 # Next in “My library”
 
