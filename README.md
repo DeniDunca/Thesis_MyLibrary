@@ -1,5 +1,5 @@
 # Thesis_MyLibrary
-Kotlin Aplication with FireStore Database 
+Kotlin Application with Firebase and Tensorflow Recommenders 
 Application Workflow:
 
 
