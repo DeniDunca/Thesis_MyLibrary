@@ -57,12 +57,13 @@ class UpdateBookActivity : BaseActivity() {
 
 
         //creates a date picker for start reading date and sets the chosen date
-        dateSetListenerStartDate = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            updateDate(findViewById(R.id.et_add_start_reading_date))
-        }
+        dateSetListenerStartDate =
+            DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                updateDate(findViewById(R.id.et_add_start_reading_date))
+            }
 
         //on clink on start reading field that it opens a picker
         findViewById<EditText>(R.id.et_add_start_reading_date).setOnClickListener {
@@ -76,12 +77,13 @@ class UpdateBookActivity : BaseActivity() {
         }
 
         //creates a date picker for finish reading date and sets the chosen date
-        dateSetListenerFinishDate = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            updateDate(findViewById(R.id.et_add_finish_reading_date))
-        }
+        dateSetListenerFinishDate =
+            DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                updateDate(findViewById(R.id.et_add_finish_reading_date))
+            }
 
         //on clink on finish reading field that it opens a picker
         findViewById<EditText>(R.id.et_add_finish_reading_date).setOnClickListener {
@@ -209,6 +211,29 @@ class UpdateBookActivity : BaseActivity() {
         findViewById<EditText>(R.id.et_add_book_pages).setText(book.pages)
         findViewById<EditText>(R.id.et_add_book_publish_year).setText(book.publishedYear)
 
+        if (book.rating.isNotEmpty()) {
+            findViewById<EditText>(R.id.et_add_book_title).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_title).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_author).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_author).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_pages).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_pages).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_genre).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_genre).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_publish_year).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_publish_year).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_isbn).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_isbn).isClickable = false
+
+            findViewById<EditText>(R.id.et_add_book_description).isFocusable = false
+            findViewById<EditText>(R.id.et_add_book_description).isClickable = false
+
+        }
     }
 
     /**
@@ -268,26 +293,6 @@ class UpdateBookActivity : BaseActivity() {
             bookHashMap[Constants.AUTHOR] =
                 findViewById<EditText>(R.id.et_add_book_author).text.toString()
         }
-        if (findViewById<RatingBar>(R.id.et_add_book_rate).rating != bookDetails.myRate) {
-            bookHashMap[Constants.MY_RATE] =
-                findViewById<RatingBar>(R.id.et_add_book_rate).rating
-        }
-        if (findViewById<EditText>(R.id.et_add_book_pages_read).text.toString() != bookDetails.pagesRead) {
-            bookHashMap[Constants.PAGES_READ] =
-                findViewById<EditText>(R.id.et_add_book_pages_read).text.toString()
-        }
-        if (findViewById<EditText>(R.id.et_add_start_reading_date).text.toString() != bookDetails.startDate) {
-            bookHashMap[Constants.START_DATE] =
-                findViewById<EditText>(R.id.et_add_start_reading_date).text.toString()
-        }
-        if (findViewById<EditText>(R.id.et_add_finish_reading_date).text.toString() != bookDetails.finishDate) {
-            bookHashMap[Constants.FINISH_DATE] =
-                findViewById<EditText>(R.id.et_add_finish_reading_date).text.toString()
-        }
-        if (findViewById<EditText>(R.id.et_add_book_notes).text.toString() != bookDetails.notes) {
-            bookHashMap[Constants.NOTES] =
-                findViewById<EditText>(R.id.et_add_book_notes).text.toString()
-        }
         if (findViewById<EditText>(R.id.et_add_book_description).text.toString() != bookDetails.description) {
             bookHashMap[Constants.DESCRIPTION] =
                 findViewById<EditText>(R.id.et_add_book_description).text.toString()
@@ -308,7 +313,26 @@ class UpdateBookActivity : BaseActivity() {
             bookHashMap[Constants.PUBLISH_YEAR] =
                 findViewById<EditText>(R.id.et_add_book_publish_year).text.toString()
         }
-
+        if (findViewById<RatingBar>(R.id.et_add_book_rate).rating != bookDetails.myRate) {
+            bookHashMap[Constants.MY_RATE] =
+                findViewById<RatingBar>(R.id.et_add_book_rate).rating
+        }
+        if (findViewById<EditText>(R.id.et_add_book_pages_read).text.toString() != bookDetails.pagesRead) {
+            bookHashMap[Constants.PAGES_READ] =
+                findViewById<EditText>(R.id.et_add_book_pages_read).text.toString()
+        }
+        if (findViewById<EditText>(R.id.et_add_start_reading_date).text.toString() != bookDetails.startDate) {
+            bookHashMap[Constants.START_DATE] =
+                findViewById<EditText>(R.id.et_add_start_reading_date).text.toString()
+        }
+        if (findViewById<EditText>(R.id.et_add_finish_reading_date).text.toString() != bookDetails.finishDate) {
+            bookHashMap[Constants.FINISH_DATE] =
+                findViewById<EditText>(R.id.et_add_finish_reading_date).text.toString()
+        }
+        if (findViewById<EditText>(R.id.et_add_book_notes).text.toString() != bookDetails.notes) {
+            bookHashMap[Constants.NOTES] =
+                findViewById<EditText>(R.id.et_add_book_notes).text.toString()
+        }
         //calls the database function that updates the book
         RealTimeDataBase().updateBookDetails(bookId, this, bookHashMap)
     }
@@ -320,13 +344,14 @@ class UpdateBookActivity : BaseActivity() {
     private fun updateDate(date: EditText) {
         val format = "dd.MM.yyyy"
         val sdf = SimpleDateFormat(format, Locale.getDefault())
-        when(date.id){
-            R.id.et_add_start_reading_date ->{
+        when (date.id) {
+            R.id.et_add_start_reading_date -> {
                 findViewById<EditText>(R.id.et_add_start_reading_date).setText(
                     sdf.format(calendar.time).toString()
                 )
             }
-            R.id.et_add_finish_reading_date ->{
+
+            R.id.et_add_finish_reading_date -> {
                 findViewById<EditText>(R.id.et_add_finish_reading_date).setText(
                     sdf.format(calendar.time).toString()
                 )
@@ -334,14 +359,14 @@ class UpdateBookActivity : BaseActivity() {
         }
     }
 
-    private fun customDialogForBackButton(){
+    private fun customDialogForBackButton() {
         val customDialog = Dialog(this)
         customDialog.setContentView(R.layout.dialog_update_confirmation)
-        customDialog.findViewById<TextView>(R.id.tv_no).setOnClickListener{
+        customDialog.findViewById<TextView>(R.id.tv_no).setOnClickListener {
             finish()
             customDialog.dismiss()
         }
-        customDialog.findViewById<TextView>(R.id.tv_yes).setOnClickListener{
+        customDialog.findViewById<TextView>(R.id.tv_yes).setOnClickListener {
             makeProgressDialogVisible(resources.getString(R.string.please_wait))
             updateBookDetails()
             customDialog.dismiss()

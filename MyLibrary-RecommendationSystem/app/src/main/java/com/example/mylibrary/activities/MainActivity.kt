@@ -266,7 +266,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                     }
                 }
                 .addOnFailureListener {
-                    prediction = arrayOf(arrayOf("bye"))
+                    prediction = arrayOf(arrayOf("Sorry! The model could not be downloaded!"))
                     callback(prediction)
                 }
         }

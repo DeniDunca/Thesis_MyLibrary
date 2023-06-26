@@ -79,7 +79,8 @@ class SignUpActivity : BaseActivity() {
                         val user = User(firebaseUser.uid, firstname, lastname, registeredEmail)
                         RealTimeDataBase().createUser(this, user)
                     } else {
-                        Toast.makeText(this, "Registration failed!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Registration failed! The email already exists", Toast.LENGTH_LONG).show()
+                        makeProgressDialogInvisible()
                     }
                 }
         }
@@ -118,8 +119,17 @@ class SignUpActivity : BaseActivity() {
                 displayError("Please enter an email")
                 false
             }
+            !email.contains("@") -> {
+                displayError("Please enter a valid email")
+                false
+            }
+
             TextUtils.isEmpty(password) -> {
                 displayError("Please enter a password")
+                false
+            }
+            password.length < 6 -> {
+                displayError("Password should have at least 6 characters")
                 false
             }
             TextUtils.isEmpty(confirmPassword) -> {

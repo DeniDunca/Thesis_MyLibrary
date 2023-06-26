@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Button
@@ -131,18 +132,37 @@ class AddBookActivity : BaseActivity() {
      * creates a book with the data from the form from interface
      */
     private fun createBook() {
-        val book = Book(
-            bookImageURL,
-            findViewById<EditText>(R.id.et_add_book_title).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_author).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_description).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_isbn).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_genre).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_pages).text.toString(),
-            findViewById<EditText>(R.id.et_add_book_publish_year).text.toString()
-        )
-        //add the created book to database
-        RealTimeDataBase().createBookAndAddItToUser(this, book)
+        val title: String =
+            findViewById<EditText>(R.id.et_add_book_title).text.toString().trim { it <= ' ' }
+        val author: String =
+            findViewById<EditText>(R.id.et_add_book_author).text.toString().trim { it <= ' ' }
+        val description: String =
+            findViewById<EditText>(R.id.et_add_book_description).text.toString().trim { it <= ' ' }
+        val isbn: String =
+            findViewById<EditText>(R.id.et_add_book_isbn).text.toString().trim { it <= ' ' }
+        val genre: String =
+            findViewById<EditText>(R.id.et_add_book_genre).text.toString().trim { it <= ' ' }
+        val pages: String =
+            findViewById<EditText>(R.id.et_add_book_pages).text.toString().trim { it <= ' ' }
+        val publishedYear: String =
+            findViewById<EditText>(R.id.et_add_book_publish_year).text.toString().trim { it <= ' ' }
+
+        if (validateForm(title, author, description, isbn, genre, pages, publishedYear)) {
+            val book = Book(
+                bookImageURL,
+                title,
+                author,
+                description,
+                isbn,
+                genre,
+                pages,
+                publishedYear
+            )
+            //add the created book to database
+            RealTimeDataBase().createBookAndAddItToUser(this, book)
+        }else{
+            makeProgressDialogInvisible()
+        }
     }
 
     /**
@@ -178,5 +198,53 @@ class AddBookActivity : BaseActivity() {
     fun bookCreatedSuccessfully() {
         makeProgressDialogInvisible()
         finish()
+    }
+
+    /**
+     * Function that verifies if the fields of the add book form are not empty
+     */
+    private fun validateForm(
+        title: String,
+        author: String,
+        description: String,
+        ISBN: String,
+        genre: String,
+        pages: String,
+        publishedYear: String,
+
+        ): Boolean {
+        return when {
+            TextUtils.isEmpty(title) -> {
+                displayError("Please enter the book title")
+                false
+            }
+            TextUtils.isEmpty(author) -> {
+                displayError("Please enter the book author")
+                false
+            }
+            TextUtils.isEmpty(description) -> {
+                displayError("Please enter the book description")
+                false
+            }
+            TextUtils.isEmpty(ISBN) -> {
+                displayError("Please enter the book ISBN")
+                false
+            }
+            TextUtils.isEmpty(genre) -> {
+                displayError("Please enter the book genre")
+                false
+            }
+            TextUtils.isEmpty(pages) -> {
+                displayError("Please enter the book number of pages")
+                false
+            }
+            TextUtils.isEmpty(publishedYear) -> {
+                displayError("Please enter the book published year")
+                false
+            }
+            else -> {
+                true
+            }
+        }
     }
 }

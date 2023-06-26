@@ -20,6 +20,7 @@ import com.google.firebase.ml.modeldownloader.CustomModel
 import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
 import com.google.firebase.ml.modeldownloader.DownloadType
 import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
+import kotlinx.coroutines.tasks.await
 import org.tensorflow.lite.Interpreter
 import java.io.File
 
