@@ -53,6 +53,7 @@
     <string name="search">Search…</string>
     <string name="no_books_in_collection">You don\'t have any books in the collection yet!</string>
     <string name="no_archive">There are no books in the archive!</string>
+    <string name="no_recommendations">There are no books recommended yet!</string>
     <string name="no_rec">There are no recommended books for you!</string>
     <string name="slash">/</string>
     <string name="save_the_changes">Save the changes?</string>

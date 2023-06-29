@@ -256,7 +256,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         } else {
             val conditions = CustomModelDownloadConditions.Builder().requireWifi().build()
             FirebaseModelDownloader.getInstance()
-                .getModel("my_model3", DownloadType.LATEST_MODEL,conditions)
+                .getModel("final_model", DownloadType.LATEST_MODEL,conditions)
                 .addOnSuccessListener { model: CustomModel? ->
                     modelFile = model?.file
                     if (modelFile != null) {
@@ -274,8 +274,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
     private fun predict(interpreter: Interpreter, userId: String): Array<Array<String>> {
         val inputs = arrayOf(userId.toByteArray())
-        val output1 = Array(1) { FloatArray(10) }
-        val output2 = Array(1) { Array(10) { "" } }
+        val output1 = Array(1) { FloatArray(20) }
+        val output2 = Array(1) { Array(20) { "" } }
         val outputs = mutableMapOf<Int, Any>(0 to output1, 1 to output2)
         interpreter.runForMultipleInputsOutputs(inputs, outputs)
 

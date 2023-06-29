@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="@string/no_archive"
+        android:text="@string/no_recommendations"
         android:textColor="@color/text_color2"
         android:textSize="@dimen/no_books_in_collection_text_size" />
 

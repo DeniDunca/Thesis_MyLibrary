@@ -94,7 +94,6 @@ class ExampleInstrumentedTest {
         Espresso.onView(ViewMatchers.withId(R.id.et_confirm_password_sign_up))
             .perform(ViewActions.typeText(accountData.password))
             .perform(ViewActions.closeSoftKeyboard())
-
         Espresso.onView(ViewMatchers.withId(R.id.btn_signUp))
             .perform(ViewActions.click())
     }
