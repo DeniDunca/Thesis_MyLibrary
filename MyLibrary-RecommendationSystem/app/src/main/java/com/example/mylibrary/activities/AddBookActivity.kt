@@ -79,13 +79,16 @@ class AddBookActivity : BaseActivity() {
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_add_book))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_add_book).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = resources.getString(R.string.add_book_title)
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_add_book).setNavigationOnClickListener {
             onBackPressed()
         }
@@ -98,10 +101,11 @@ class AddBookActivity : BaseActivity() {
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //verifies if the mobile has permission
         if (requestCode == Constants.READ_STORAGE_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Constants.showImageChooser(this)
-            } else {
+            } else {//if it doesn't have show message
                 Toast.makeText(
                     this,
                     "Please allow storage permission from the app settings!",
@@ -117,6 +121,7 @@ class AddBookActivity : BaseActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        //get the image from the storage and put it in the element using Glide library
         if (resultCode == Activity.RESULT_OK && requestCode == Constants.PICK_IMAGE_CODE && data!!.data != null) {
             selectedImageUri = data.data
             try {
@@ -132,6 +137,7 @@ class AddBookActivity : BaseActivity() {
      * creates a book with the data from the form from interface
      */
     private fun createBook() {
+        //get the inputs written by user
         val title: String =
             findViewById<EditText>(R.id.et_add_book_title).text.toString().trim { it <= ' ' }
         val author: String =
@@ -147,6 +153,7 @@ class AddBookActivity : BaseActivity() {
         val publishedYear: String =
             findViewById<EditText>(R.id.et_add_book_publish_year).text.toString().trim { it <= ' ' }
 
+        //validate the inputs
         if (validateForm(title, author, description, isbn, genre, pages, publishedYear)) {
             val book = Book(
                 bookImageURL,
@@ -160,7 +167,7 @@ class AddBookActivity : BaseActivity() {
             )
             //add the created book to database
             RealTimeDataBase().createBookAndAddItToUser(this, book)
-        }else{
+        } else {
             makeProgressDialogInvisible()
         }
     }
@@ -170,6 +177,7 @@ class AddBookActivity : BaseActivity() {
      */
     private fun uploadBookImage() {
         makeProgressDialogVisible(resources.getString(R.string.please_wait))
+        //if an image was added, put it intro the Storage in Database
         if (selectedImageUri != null) {
             val ref: StorageReference = FirebaseStorage.getInstance().reference.child(
                 "Book_image" + System.currentTimeMillis() + "." + Constants.getFileExtension(
@@ -218,30 +226,37 @@ class AddBookActivity : BaseActivity() {
                 displayError("Please enter the book title")
                 false
             }
+
             TextUtils.isEmpty(author) -> {
                 displayError("Please enter the book author")
                 false
             }
+
             TextUtils.isEmpty(description) -> {
                 displayError("Please enter the book description")
                 false
             }
+
             TextUtils.isEmpty(ISBN) -> {
                 displayError("Please enter the book ISBN")
                 false
             }
+
             TextUtils.isEmpty(genre) -> {
                 displayError("Please enter the book genre")
                 false
             }
+
             TextUtils.isEmpty(pages) -> {
                 displayError("Please enter the book number of pages")
                 false
             }
+
             TextUtils.isEmpty(publishedYear) -> {
                 displayError("Please enter the book published year")
                 false
             }
+
             else -> {
                 true
             }

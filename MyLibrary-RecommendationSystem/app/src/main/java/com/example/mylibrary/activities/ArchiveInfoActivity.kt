@@ -38,13 +38,16 @@ class ArchiveInfoActivity : BaseActivity() {
      */
     private fun setupActionBar(title: String) {
         setSupportActionBar(findViewById(R.id.toolbar_archive_info))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_archive_info).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = title
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_archive_info).setNavigationOnClickListener {
             onBackPressed()
         }
@@ -55,7 +58,9 @@ class ArchiveInfoActivity : BaseActivity() {
      */
     fun setArchiveData(archive: Archive) {
         archiveItem = archive
+        //put the title in the toolbar as the title of the book
         setupActionBar(archive.title)
+        //put in the image element the image from the book in archive
         Glide
             .with(this@ArchiveInfoActivity)
             .load(archive.image)
@@ -63,6 +68,7 @@ class ArchiveInfoActivity : BaseActivity() {
             .placeholder(R.drawable.ic_book)
             .into(findViewById(R.id.iv_archive_info))
 
+        //put the rest of details about the book in the elements on the page
         findViewById<TextView>(R.id.tv_archive_title).text = archive.title
         findViewById<TextView>(R.id.tv_archive_author).text = archive.author
         findViewById<RatingBar>(R.id.tv_archive_rating).rating = archive.rating.toFloat()

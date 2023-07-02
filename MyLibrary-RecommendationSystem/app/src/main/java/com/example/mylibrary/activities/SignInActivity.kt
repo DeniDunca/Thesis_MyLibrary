@@ -44,14 +44,13 @@ class SignInActivity : BaseActivity() {
     private fun setUpActionBar() {
         val toolbarSignIn = findViewById<Toolbar>(R.id.toolbar_sign_in)
         setSupportActionBar(toolbarSignIn)
-
+        //set the action bar icon
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_black_back)
-
         }
-
+        //set the back button on the action bar
         toolbarSignIn.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -77,7 +76,7 @@ class SignInActivity : BaseActivity() {
                     //go to main activity
                     RealTimeDataBase().loadUserData(this@SignInActivity)
                 } else {
-                    Toast.makeText(this, "Signing in failure!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Signing failed!", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -86,8 +85,9 @@ class SignInActivity : BaseActivity() {
     /**
      * function that sign in the user
      */
-    fun signInSuccess(user: User) {
+    fun signInSuccess() {
         makeProgressDialogInvisible()
+        //redirect to main activity
         startActivity(Intent(this, MainActivity::class.java))
         Toast.makeText(this, "You successfully signed in!", Toast.LENGTH_LONG).show()
         finish()
@@ -102,10 +102,12 @@ class SignInActivity : BaseActivity() {
                 displayError("Please enter your email")
                 false
             }
+
             TextUtils.isEmpty(password) -> {
                 displayError("Please enter your password")
                 false
             }
+
             else -> {
                 true
             }

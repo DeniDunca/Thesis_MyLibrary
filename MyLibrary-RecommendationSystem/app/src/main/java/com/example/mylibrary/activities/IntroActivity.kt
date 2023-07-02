@@ -24,6 +24,7 @@ class IntroActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
+        //creates the buttons
         val btnSignUp = findViewById<Button>(R.id.btn_sign_up)
         val btnSignIn = findViewById<Button>(R.id.btn_sign_in)
 

@@ -39,7 +39,6 @@ class UpdateBookActivity : BaseActivity() {
     private lateinit var dateSetListenerStartDate: DatePickerDialog.OnDateSetListener
     private lateinit var dateSetListenerFinishDate: DatePickerDialog.OnDateSetListener
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_update_book)
@@ -135,13 +134,16 @@ class UpdateBookActivity : BaseActivity() {
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_update_book))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_update_book).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = resources.getString(R.string.update_book_title)
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_update_book).setNavigationOnClickListener {
             customDialogForBackButton()
         }
@@ -156,10 +158,12 @@ class UpdateBookActivity : BaseActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //verifies if the user has given permission to access the storage for add book image
         if (requestCode == Constants.READ_STORAGE_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Constants.showImageChooser(this)
             } else {
+                //if the app doesn't have the permission display message
                 Toast.makeText(
                     this,
                     "Please allow storage permission from the app settings!",
@@ -171,6 +175,7 @@ class UpdateBookActivity : BaseActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        //put the image from the database to the image book element using Glide
         if (resultCode == Activity.RESULT_OK && requestCode == Constants.PICK_IMAGE_CODE && data!!.data != null) {
             selectedImageUri = data.data
             try {
@@ -191,6 +196,7 @@ class UpdateBookActivity : BaseActivity() {
      */
     fun setBookData(book: Book) {
         bookDetails = book
+        //set the chosen image using glide
         Glide
             .with(this@UpdateBookActivity)
             .load(book.image)
@@ -198,6 +204,7 @@ class UpdateBookActivity : BaseActivity() {
             .placeholder(R.drawable.ic_book)
             .into(findViewById(R.id.iv_update_book))
 
+        //set the book details
         findViewById<EditText>(R.id.et_add_book_title).setText(book.title)
         findViewById<EditText>(R.id.et_add_book_author).setText(book.author)
         findViewById<RatingBar>(R.id.et_add_book_rate).rating = book.myRate
@@ -211,6 +218,7 @@ class UpdateBookActivity : BaseActivity() {
         findViewById<EditText>(R.id.et_add_book_pages).setText(book.pages)
         findViewById<EditText>(R.id.et_add_book_publish_year).setText(book.publishedYear)
 
+        //the user cannot modify the details about the books added from archive, only the details from the books added manually
         if (book.rating.isNotEmpty()) {
             findViewById<EditText>(R.id.et_add_book_title).isFocusable = false
             findViewById<EditText>(R.id.et_add_book_title).isClickable = false
@@ -241,6 +249,7 @@ class UpdateBookActivity : BaseActivity() {
      */
     private fun uploadImage() {
         makeProgressDialogVisible(resources.getString(R.string.please_wait))
+        //gets the image and uploads it to the Storage database in Firebase
         if (selectedImageUri != null) {
             val ref: StorageReference = FirebaseStorage.getInstance().reference.child(
                 "Book_image" + System.currentTimeMillis() + "." + Constants.getFileExtension(
@@ -248,7 +257,6 @@ class UpdateBookActivity : BaseActivity() {
                     selectedImageUri
                 )
             )
-
             ref.putFile(selectedImageUri!!).addOnSuccessListener { taskSnapshot ->
                 Log.e(
                     "Firebase image url",
@@ -285,6 +293,7 @@ class UpdateBookActivity : BaseActivity() {
         if (bookImageUrl.isNotEmpty() && bookImageUrl != bookDetails.image) {
             bookHashMap[Constants.IMAGE] = bookImageUrl
         }
+        //update all the book details
         if (findViewById<EditText>(R.id.et_add_book_title).text.toString() != bookDetails.title) {
             bookHashMap[Constants.TITLE] =
                 findViewById<EditText>(R.id.et_add_book_title).text.toString()
@@ -344,6 +353,7 @@ class UpdateBookActivity : BaseActivity() {
     private fun updateDate(date: EditText) {
         val format = "dd.MM.yyyy"
         val sdf = SimpleDateFormat(format, Locale.getDefault())
+        //updates the date that the user puts in the start date and finish date
         when (date.id) {
             R.id.et_add_start_reading_date -> {
                 findViewById<EditText>(R.id.et_add_start_reading_date).setText(
@@ -359,6 +369,9 @@ class UpdateBookActivity : BaseActivity() {
         }
     }
 
+    /**
+     * It is a Custom Dialog that appears on the back button that asks if the user wants to save the modified details about the book
+     */
     private fun customDialogForBackButton() {
         val customDialog = Dialog(this)
         customDialog.setContentView(R.layout.dialog_update_confirmation)

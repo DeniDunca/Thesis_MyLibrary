@@ -39,10 +39,11 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         const val MY_PROFILE_CODE: Int = 9
     }
 
+    //declare variables
     private lateinit var userId: String
-    private var interpreter : Interpreter? = null
-    private var prediction :  Array<Array<String>> = arrayOf(arrayOf(""))
-    private var modelFile : File? = null
+    private var interpreter: Interpreter? = null
+    private var prediction: Array<Array<String>> = arrayOf(arrayOf(""))
+    private var modelFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         //sets up action bar
         setupActionBar()
 
-        //get the bestsellers from database
+        //get the recommended books for user from database
         //getTopBooks()
         getRecommendedBooks()
 
@@ -67,27 +68,29 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         //when clicked on the plus button adds a book by selecting from the two actions
         findViewById<FloatingActionButton>(R.id.fab_add_book).setOnClickListener {
             val addBookDialog = AlertDialog.Builder(this)
+            //set the alert dialog title
             addBookDialog.setTitle("Select Action")
             val addBookDialogItems =
                 arrayOf("Search books by keyword or ISBN", "Add new book manually")
+            //set the alert dialog option titles
             addBookDialog.setItems(addBookDialogItems) { _, which ->
                 when (which) {
-                    0 -> {
+                    0 -> {//when clicked on first option go to SearchArchiveActivity
                         val intent = Intent(this, SearchArchiveActivity::class.java)
                         intent.putExtra(Constants.USERID, userId)
                         startActivity(intent)
                     }
-                    1 -> {
+
+                    1 -> {//when clicked on first option go to AddBookActivity
                         val intent = Intent(this, AddBookActivity::class.java)
                         intent.putExtra(Constants.USERID, userId)
                         startActivity(intent)
                     }
                 }
             }
+            //show the alert dialog
             addBookDialog.show()
-
         }
-
     }
 
 
@@ -96,7 +99,9 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_main))
+        //get toolbar id
         supportActionBar?.title = resources.getString(R.string.rec_books)
+        //set the menu button icon, color and action (opens navigation bar)
         findViewById<Toolbar>(R.id.toolbar_main).setNavigationIcon(R.drawable.ic_menu)
         findViewById<Toolbar>(R.id.toolbar_main).setBackgroundColor(resources.getColor(R.color.purple_200))
         findViewById<Toolbar>(R.id.toolbar_main).setNavigationOnClickListener {
@@ -145,16 +150,19 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
-            R.id.nav_my_books -> {
+            R.id.nav_my_books -> {//goes to MyBooksActivity
                 startActivity(Intent(this, MyBooksActivity::class.java))
             }
-            R.id.nav_my_stats -> {
+
+            R.id.nav_my_stats -> {//goes to StatisticsActivity
                 startActivity(Intent(this, StatisticsActivity::class.java))
             }
-            R.id.nav_my_profile -> {
+
+            R.id.nav_my_profile -> {//goes to MyProfileActivity
                 startActivityForResult(Intent(this, MyProfileActivity::class.java), MY_PROFILE_CODE)
             }
-            R.id.nav_sign_out -> {
+
+            R.id.nav_sign_out -> {//disconnects the user
                 modelFile = null
                 interpreter = null
                 FirebaseAuth.getInstance().signOut()
@@ -175,6 +183,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
     fun updateNavigationUserDetails(user: User) {
         userId = user.id
 
+        //put the user image from database into the element for user image in the menu
         Glide
             .with(this)
             .load(user.image)
@@ -182,6 +191,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             .placeholder(R.drawable.ic_user)
             .into(findViewById<CircleImageView>(R.id.nav_user_image))
 
+        //sets the firstname and the lastname of the user on the menu
         findViewById<TextView>(R.id.tv_firstname_lastname).text =
             user.firstname + " " + user.lastname
     }
@@ -191,14 +201,15 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        //send the data about user to the MyProfileActivity
         if (resultCode == Activity.RESULT_OK && requestCode == MY_PROFILE_CODE) {
             RealTimeDataBase().loadUserData(this)
-        } else if (resultCode == Activity.RESULT_OK && requestCode == MyBooksActivity.MY_BOOK_CODE) {
+        } //send the data about user's books to the MyBooksActivity
+        else if (resultCode == Activity.RESULT_OK && requestCode == MyBooksActivity.MY_BOOK_CODE) {
             getTopBooks()
         } else {
             Log.e("Cancelled", "Cancelled")
         }
-
     }
 
     /**
@@ -206,28 +217,35 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
      */
     fun populatesRecommendedList(bookList: List<Archive>) {
         val rvBookList = findViewById<RecyclerView>(R.id.rv_rec_list)
+        //if there are recommended books for the user
         if (bookList.size > 0) {
+            //make the list of books visible
             rvBookList.visibility = View.VISIBLE
+            //make the default message not visible
             findViewById<TextView>(R.id.tv_no_rec).visibility = View.GONE
 
+            //put the layout to the recyclerView
             rvBookList.layoutManager = LinearLayoutManager(this)
             findViewById<RecyclerView>(R.id.rv_rec_list).setHasFixedSize(true)
 
+            //put the adapter to the recyclerView
             val adapter = RecommendedItemsAdapter(this, bookList)
             rvBookList.adapter = adapter
 
-
+            //put the action for when an element is swiped to the right
             val addSwipeHandler = object : SwipeToAddCallback(this) {
+                // on swiped the book is added to the user's collection
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     adapter.notifyAddItem(this@MainActivity, viewHolder.adapterPosition)
 
                 }
             }
 
+            //touch helper for books
             val addItemTouchHelper = ItemTouchHelper(addSwipeHandler)
             addItemTouchHelper.attachToRecyclerView(findViewById(R.id.rv_rec_list))
 
-
+            //on click on preview of the book show info about book
             adapter.setOnClickListener(object :
                 RecommendedItemsAdapter.OnClickListener {
                 override fun onClick(position: Int, model: Archive) {
@@ -249,46 +267,62 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         RealTimeDataBase().getFirstBestBooks(this)
     }
 
-    private fun getPredictionsFromFirebaseMLModel(userId: String, callback: (Array<Array<String>>) -> Unit) {
+    private fun getPredictionsFromFirebaseMLModel(
+        userId: String,
+        callback: (Array<Array<String>>) -> Unit
+    ) {
         if (modelFile != null && interpreter != null) {
             prediction = predict(interpreter!!, userId)
             callback(prediction)
         } else {
+            //download the model from Firebase Machine Learning
             val conditions = CustomModelDownloadConditions.Builder().requireWifi().build()
             FirebaseModelDownloader.getInstance()
-                .getModel("final_model", DownloadType.LATEST_MODEL,conditions)
+                .getModel("final_model", DownloadType.LATEST_MODEL, conditions)
                 .addOnSuccessListener { model: CustomModel? ->
                     modelFile = model?.file
+                    //if the model is downloaded correctly git it to an interpreter
                     if (modelFile != null) {
                         interpreter = Interpreter(modelFile!!)
+                        //give the interpreter to the prediction method
                         prediction = predict(interpreter!!, userId)
+                        //return the result
                         callback(prediction)
                     }
                 }
                 .addOnFailureListener {
+                    //in case of failure return a message
                     prediction = arrayOf(arrayOf("Sorry! The model could not be downloaded!"))
                     callback(prediction)
                 }
         }
     }
 
+    /**
+     * Prediction method that senst in the inputs to the model and returns the outputs
+     */
     private fun predict(interpreter: Interpreter, userId: String): Array<Array<String>> {
+        //the input is the user id
         val inputs = arrayOf(userId.toByteArray())
+        //the outputs, we only need output2, it contains the isbn list
         val output1 = Array(1) { FloatArray(20) }
         val output2 = Array(1) { Array(20) { "" } }
         val outputs = mutableMapOf<Int, Any>(0 to output1, 1 to output2)
+        //run the model with the inputs and put the results in the outputs
         interpreter.runForMultipleInputsOutputs(inputs, outputs)
 
+        //return the isbn list
         return output2
     }
 
+    /**
+     * Gets the isbns returned by the prediction and sends it to the database call to return the book details
+     */
     private fun getRecommendedBooks() {
         getPredictionsFromFirebaseMLModel(getCurrentUserId()) { predictions ->
             val flattenedPredictions = predictions.flatten()
             RealTimeDataBase().getRecommendedBooks(this, flattenedPredictions)
         }
     }
-
-
 
 }

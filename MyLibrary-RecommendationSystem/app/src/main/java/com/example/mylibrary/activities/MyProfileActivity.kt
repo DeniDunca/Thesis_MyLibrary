@@ -39,8 +39,10 @@ class MyProfileActivity : BaseActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
+        //set up action bar
         setupActionBar()
 
+        //get user data
         RealTimeDataBase().loadUserData(this)
 
         //checking permissions, if it has rights than open image chooser
@@ -73,6 +75,26 @@ class MyProfileActivity : BaseActivity() {
     }
 
     /**
+     * Sets up the action bar for the page with back button
+     */
+    private fun setupActionBar() {
+        setSupportActionBar(findViewById(R.id.toolbar_my_profile))
+        //get toolbar id
+        findViewById<Toolbar>(R.id.toolbar_my_profile).setBackgroundColor(resources.getColor(R.color.purple_200))
+        val actionBar = supportActionBar
+        //change the title and add back button with icon
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
+            actionBar.title = resources.getString(R.string.my_profile)
+        }
+        //set the back button
+        findViewById<Toolbar>(R.id.toolbar_my_profile).setNavigationOnClickListener {
+            onBackPressed()
+        }
+    }
+
+    /**
      * Asks for permission and if is denied shows a message
      */
     override fun onRequestPermissionsResult(
@@ -81,10 +103,12 @@ class MyProfileActivity : BaseActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //if the user has permission, then he can add user profile picture
         if (requestCode == Constants.READ_STORAGE_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Constants.showImageChooser(this)
             } else {
+                //else shows a message to go change the permission settings
                 Toast.makeText(
                     this,
                     "Please allow storage permission from the app settings!",
@@ -97,6 +121,7 @@ class MyProfileActivity : BaseActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        //get the data about the user and populate teh image
         if (resultCode == Activity.RESULT_OK && requestCode == Constants.PICK_IMAGE_CODE && data!!.data != null) {
             selectedImageUri = data.data
             try {
@@ -113,34 +138,18 @@ class MyProfileActivity : BaseActivity() {
     }
 
     /**
-     * Sets up the action bar for the page with back button
-     */
-    private fun setupActionBar() {
-        setSupportActionBar(findViewById(R.id.toolbar_my_profile))
-        findViewById<Toolbar>(R.id.toolbar_my_profile).setBackgroundColor(resources.getColor(R.color.purple_200))
-        val actionBar = supportActionBar
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
-            actionBar.title = resources.getString(R.string.my_profile)
-        }
-        findViewById<Toolbar>(R.id.toolbar_my_profile).setNavigationOnClickListener {
-            onBackPressed()
-        }
-    }
-
-    /**
      * Gets data from data base and put it on the page
      */
     fun setUserData(user: User) {
         userDetails = user
+        //gets the user image from database and puts it in the use image element with Glide
         Glide
             .with(this@MyProfileActivity)
             .load(user.image)
             .centerCrop()
             .placeholder(R.drawable.ic_user)
             .into(findViewById(R.id.iv_my_profile_image))
-
+        //gets the user details from database and puts in the elements on the interface
         findViewById<EditText>(R.id.et_my_profile_firstname).setText(user.firstname)
         findViewById<EditText>(R.id.et_my_profile_lastname).setText(user.lastname)
         findViewById<EditText>(R.id.et_my_profile_email).setText(user.email)
@@ -155,6 +164,7 @@ class MyProfileActivity : BaseActivity() {
      */
     private fun uploadImage() {
         makeProgressDialogVisible(resources.getString(R.string.please_wait))
+        //if the user uploads a new image, stores it in the Storage database in Firebase
         if (selectedImageUri != null) {
             val ref: StorageReference = FirebaseStorage.getInstance().reference.child(
                 "User_image" + System.currentTimeMillis() + "." + Constants.getFileExtension(
@@ -162,7 +172,6 @@ class MyProfileActivity : BaseActivity() {
                     selectedImageUri
                 )
             )
-
             ref.putFile(selectedImageUri!!).addOnSuccessListener { taskSnapshot ->
                 Log.e(
                     "Firebase image url",
@@ -200,6 +209,7 @@ class MyProfileActivity : BaseActivity() {
         if (profileImageUrl.isNotEmpty() && profileImageUrl != userDetails.image) {
             userHashMap[Constants.IMAGE] = profileImageUrl
         }
+        //update the rest of elements
         if (findViewById<EditText>(R.id.et_my_profile_firstname).text.toString() != userDetails.firstname) {
             userHashMap[Constants.FIRSTNAME] =
                 findViewById<EditText>(R.id.et_my_profile_firstname).text.toString()
@@ -213,6 +223,7 @@ class MyProfileActivity : BaseActivity() {
                 findViewById<EditText>(R.id.et_my_profile_mobile).text.toString()
         }
 
+        //calls the method that updates the user details in the database
         RealTimeDataBase().updateUserProfile(this, userHashMap)
     }
 

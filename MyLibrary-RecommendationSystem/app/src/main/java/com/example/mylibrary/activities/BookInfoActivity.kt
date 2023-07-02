@@ -38,13 +38,16 @@ class BookInfoActivity : BaseActivity() {
      */
     private fun setupActionBar(title: String) {
         setSupportActionBar(findViewById(R.id.toolbar_book_info))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_book_info).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = title
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_book_info).setNavigationOnClickListener {
             onBackPressed()
         }
@@ -55,15 +58,22 @@ class BookInfoActivity : BaseActivity() {
      */
     fun setBookData(book: Book) {
         bookDetails = book
+        //put the title in the toolbar as the title of the book
         setupActionBar(book.title)
-        Glide.with(this@BookInfoActivity).load(book.image).centerCrop()
-            .placeholder(R.drawable.ic_book).into(findViewById(R.id.iv_book_info))
+        //put in the image element the image from the book in archive
+        Glide
+            .with(this@BookInfoActivity)
+            .load(book.image)
+            .centerCrop()
+            .placeholder(R.drawable.ic_book)
+            .into(findViewById(R.id.iv_book_info))
 
+        //put the rest of details about the book in the elements on the page
         findViewById<TextView>(R.id.tv_book_title).text = book.title
         findViewById<TextView>(R.id.tv_book_author).text = book.author
-        if(book.rating.isNotEmpty()){
+        if (book.rating.isNotEmpty()) {
             findViewById<RatingBar>(R.id.tv_book_rating).rating = book.rating.toFloat()
-        }else{
+        } else {
             findViewById<RatingBar>(R.id.tv_book_rating).rating = book.myRate
         }
         findViewById<TextView>(R.id.tv_book_description).text = book.description

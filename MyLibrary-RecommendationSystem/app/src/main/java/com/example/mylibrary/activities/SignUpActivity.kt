@@ -25,6 +25,11 @@ class SignUpActivity : BaseActivity() {
 
         //adding the back icon to the action bar
         setUpActionBar()
+
+        //when the button is clicked the user is created
+        findViewById<Button>(R.id.btn_signUp).setOnClickListener {
+            signUpUser()
+        }
     }
 
     /**
@@ -33,20 +38,15 @@ class SignUpActivity : BaseActivity() {
     private fun setUpActionBar() {
         val toolbarSignup = findViewById<Toolbar>(R.id.toolbar_sign_up)
         setSupportActionBar(toolbarSignup)
-
+        //set the action bar icon
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_black_back)
-
         }
-
+        //set the back button on the action bar
         toolbarSignup.setNavigationOnClickListener {
             onBackPressed()
-        }
-
-        findViewById<Button>(R.id.btn_signUp).setOnClickListener {
-            signUpUser()
         }
     }
 
@@ -73,13 +73,19 @@ class SignUpActivity : BaseActivity() {
             //create an user with given pass and email
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
+                    //created the user in the RealTime Database Users table too
                     if (task.isSuccessful) {
                         val firebaseUser: FirebaseUser = task.result!!.user!!
                         val registeredEmail = firebaseUser.email!!
                         val user = User(firebaseUser.uid, firstname, lastname, registeredEmail)
                         RealTimeDataBase().createUser(this, user)
                     } else {
-                        Toast.makeText(this, "Registration failed! The email already exists", Toast.LENGTH_LONG).show()
+                        //else show error
+                        Toast.makeText(
+                            this,
+                            "Registration failed! The email already exists!",
+                            Toast.LENGTH_LONG
+                        ).show()
                         makeProgressDialogInvisible()
                     }
                 }
@@ -111,14 +117,17 @@ class SignUpActivity : BaseActivity() {
                 displayError("Please enter your firstname")
                 false
             }
+
             TextUtils.isEmpty(lastname) -> {
                 displayError("Please enter your lastname")
                 false
             }
+
             TextUtils.isEmpty(email) -> {
                 displayError("Please enter an email")
                 false
             }
+
             !email.contains("@") -> {
                 displayError("Please enter a valid email")
                 false
@@ -128,18 +137,22 @@ class SignUpActivity : BaseActivity() {
                 displayError("Please enter a password")
                 false
             }
+
             password.length < 6 -> {
                 displayError("Password should have at least 6 characters")
                 false
             }
+
             TextUtils.isEmpty(confirmPassword) -> {
                 displayError("Please confirm the password")
                 false
             }
+
             !TextUtils.equals(password, confirmPassword) -> {
                 displayError("Please confirm the password")
                 false
             }
+
             else -> {
                 true
             }

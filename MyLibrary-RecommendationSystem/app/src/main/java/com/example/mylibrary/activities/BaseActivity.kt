@@ -28,8 +28,11 @@ open class BaseActivity : AppCompatActivity() {
      */
     fun makeProgressDialogVisible(text: String) {
         progressDialog = Dialog(this)
+        //set the progress dialog
         progressDialog.setContentView(R.layout.progress_dialog)
+        //put a custom text on the progress bar
         progressDialog.findViewById<TextView>(R.id.tv_progress_dialog_text).text = text
+        //shows the progress bar
         progressDialog.show()
     }
 
@@ -70,10 +73,12 @@ open class BaseActivity : AppCompatActivity() {
      * Function for displaying customizable error
      */
     fun displayError(message: String) {
+        //creates a snackbar and put the message and the color for it
         val snackBar =
             Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
         val snackBarView = snackBar.view
         snackBarView.setBackgroundColor(ContextCompat.getColor(this, R.color.error_color))
+        //shows the progress bar
         snackBar.show()
     }
 }

@@ -29,10 +29,10 @@ class SplashActivity : AppCompatActivity() {
         //delay before opening the intro page or main page depending if the user was logged in before
         Handler().postDelayed({
             var currentUserId = RealTimeDataBase().getCurrentUserID()
-
+            //if the user is authenticated redirect to main page
             if (currentUserId.isNotEmpty()) {
                 startActivity(Intent(this, MainActivity::class.java))
-            } else {
+            } else {//if the user is not authenticated redirect to intro page
                 startActivity(Intent(this, IntroActivity::class.java))
             }
             finish()

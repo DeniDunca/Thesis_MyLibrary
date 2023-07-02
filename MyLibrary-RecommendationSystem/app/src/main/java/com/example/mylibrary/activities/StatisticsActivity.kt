@@ -52,18 +52,24 @@ class StatisticsActivity : BaseActivity() {
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_stats))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_stats).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = resources.getString(R.string.stats)
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_stats).setNavigationOnClickListener {
             onBackPressed()
         }
     }
 
+    /**
+     * Populates the Pie Chart with data and the favourite user's genres
+     */
     fun populatePieChart(bookList: List<Book>) {
         pieChart = findViewById(R.id.pieChart)
 
@@ -129,7 +135,10 @@ class StatisticsActivity : BaseActivity() {
 
     }
 
-    fun populateBarChart(bookList: List<Book>){
+    /**
+     * Populates the Bar Chart with data about the books read in each month
+     */
+    fun populateBarChart(bookList: List<Book>) {
         barChart = findViewById(R.id.idBarChart)
         barEntriesList = ArrayList()
 
@@ -210,7 +219,10 @@ class StatisticsActivity : BaseActivity() {
         barChart.invalidate()
     }
 
-    fun setTheFavouriteBook(bookList: List<Book>){
+    /**
+     * Sets the favourite book based on the maximum rating from the books in collection
+     */
+    fun setTheFavouriteBook(bookList: List<Book>) {
         var bestBook: Book? = null
 
         for (book in bookList) {
@@ -232,8 +244,11 @@ class StatisticsActivity : BaseActivity() {
         }
     }
 
-    fun setNumberOfBooksFinished(bookList: List<Book>){
-        val counter =  bookList.count { it.finishDate != "" }
+    /**
+     * Sets the number of finished books in the collection
+     */
+    fun setNumberOfBooksFinished(bookList: List<Book>) {
+        val counter = bookList.count { it.finishDate != "" }
         val animator = ValueAnimator.ofInt(1, counter)
         animator.duration = 1000 // Animation duration in milliseconds
         animator.addUpdateListener { animation ->

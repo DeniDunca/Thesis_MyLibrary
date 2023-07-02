@@ -52,7 +52,7 @@ class RealTimeDataBase {
                 val loggedInUser = snapshot.getValue(User::class.java)!!
                 when (activity) {
                     is SignInActivity -> {
-                        activity.signInSuccess(loggedInUser)
+                        activity.signInSuccess()
                     }
                     is MainActivity -> {
                         activity.updateNavigationUserDetails(loggedInUser)
@@ -595,7 +595,10 @@ class RealTimeDataBase {
 
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val bookList = arrayListOf<Archive>()
+                val bookList = mutableListOf<Archive>()
+                val userId = getCurrentUserID()
+                val userBookRef = database.getReference(Constants.USER_BOOK)
+
                 for (bookSnapshot in snapshot.children) {
                     val book = bookSnapshot.getValue(Archive::class.java)
                     if (book != null && isbnList.contains(book.isbn)) {
@@ -603,8 +606,27 @@ class RealTimeDataBase {
                         bookList.add(book)
                     }
                 }
-                bookList.sortByDescending { it.rating }
-                activity.populatesRecommendedList(bookList)
+
+                userBookRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(userBookSnapshot: DataSnapshot) {
+                        val userBookIsbns = mutableListOf<String>()
+                        for (userBookChildSnapshot in userBookSnapshot.children) {
+                            val userBookIsbn = userBookChildSnapshot.child("isbn").getValue(String::class.java)
+                            if (userBookIsbn != null) {
+                                userBookIsbns.add(userBookIsbn)
+                            }
+                        }
+
+                        bookList.removeAll { userBookIsbns.contains(it.isbn) }
+
+                        bookList.sortByDescending { it.rating }
+                        activity.populatesRecommendedList(bookList)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(activity, "Error reading user-books: ${error.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
 
             override fun onCancelled(error: DatabaseError) {

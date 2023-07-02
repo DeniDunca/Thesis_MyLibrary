@@ -46,13 +46,16 @@ class SearchArchiveActivity : BaseActivity() {
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_archive))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_archive).setBackgroundColor(resources.getColor(R.color.purple_200))
         val actionBar = supportActionBar
+        //change the title and add back button with icon
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = resources.getString(R.string.archive)
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_archive).setNavigationOnClickListener {
             onBackPressed()
         }
@@ -64,18 +67,23 @@ class SearchArchiveActivity : BaseActivity() {
     fun populatesArchiveList(bookList: ArrayList<Archive>) {
         makeProgressDialogInvisible()
         val rvBookList = findViewById<RecyclerView>(R.id.rv_archive_list)
+        //if there are books in the archive table populates the list on the page
         if (bookList.size > 0) {
+            //make the book list visible
             rvBookList.visibility = View.VISIBLE
+            //make the default message invisible
             findViewById<TextView>(R.id.tv_no_archive).visibility = View.GONE
 
+            // creates a layout for the recyclerView
             rvBookList.layoutManager = LinearLayoutManager(this)
             findViewById<RecyclerView>(R.id.rv_archive_list).setHasFixedSize(true)
 
+            // creates an adapter for the recyclerView
             val adapter = ArchiveItemsAdapter(this, bookList)
             rvBookList.adapter = adapter
 
             //swiper to add the book to my books collection
-            val addSwipeHandler = object: SwipeToAddCallback(this){
+            val addSwipeHandler = object : SwipeToAddCallback(this) {
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     adapter.notifyAddItem(this@SearchArchiveActivity, viewHolder.adapterPosition)
 
@@ -86,22 +94,25 @@ class SearchArchiveActivity : BaseActivity() {
             addItemTouchHelper.attachToRecyclerView(findViewById(R.id.rv_archive_list))
 
             //search bar
-            findViewById<SearchView>(R.id.search_archive).setOnQueryTextListener(object:
-                SearchView.OnQueryTextListener{
+            findViewById<SearchView>(R.id.search_archive).setOnQueryTextListener(object :
+                SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     return false
                 }
 
+                //search book by title, author, genre or isbn
                 override fun onQueryTextChange(newText: String): Boolean {
                     val searchList = ArrayList<Archive>()
-                    for(book in bookList){
-                        if(book.title?.lowercase()?.contains(newText.lowercase()) == true){
+                    for (book in bookList) {
+                        if (book.title?.lowercase()?.contains(newText.lowercase()) == true) {
                             searchList.add(book)
-                        }else if(book.author?.lowercase()?.contains(newText.lowercase()) == true){
+                        } else if (book.author?.lowercase()
+                                ?.contains(newText.lowercase()) == true
+                        ) {
                             searchList.add(book)
-                        }else if(book.genre?.lowercase()?.contains(newText.lowercase()) == true){
+                        } else if (book.genre?.lowercase()?.contains(newText.lowercase()) == true) {
                             searchList.add(book)
-                        }else if(book.isbn?.lowercase()?.contains(newText.lowercase()) == true){
+                        } else if (book.isbn?.lowercase()?.contains(newText.lowercase()) == true) {
                             searchList.add(book)
                         }
                     }
@@ -110,7 +121,7 @@ class SearchArchiveActivity : BaseActivity() {
                 }
             })
 
-            //click item for info
+            //click item for info about the book
             adapter.setOnClickListener(object :
                 ArchiveItemsAdapter.OnClickListener {
                 override fun onClick(position: Int, model: Archive) {
@@ -139,6 +150,5 @@ class SearchArchiveActivity : BaseActivity() {
             getArchive()
         }
     }
-
 
 }

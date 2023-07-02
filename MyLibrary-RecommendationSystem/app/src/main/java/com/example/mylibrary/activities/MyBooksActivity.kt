@@ -26,6 +26,7 @@ class MyBooksActivity : BaseActivity() {
         const val MY_BOOK_CODE: Int = 7
     }
 
+    //creates the adapter for the RecyclerView
     private lateinit var adapter: BookItemsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,13 +50,16 @@ class MyBooksActivity : BaseActivity() {
      */
     private fun setupActionBar() {
         setSupportActionBar(findViewById(R.id.toolbar_my_books))
+        //get toolbar id
         findViewById<Toolbar>(R.id.toolbar_my_books).setBackgroundColor(resources.getColor(R.color.purple_200))
+        //change the title and add back button with icon
         val actionBar = supportActionBar
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setHomeAsUpIndicator(R.drawable.ic_white_back)
             actionBar.title = resources.getString(R.string.my_books)
         }
+        //set the back button
         findViewById<Toolbar>(R.id.toolbar_my_books).setNavigationOnClickListener {
             onBackPressed()
         }
@@ -69,13 +73,18 @@ class MyBooksActivity : BaseActivity() {
     fun populatesBooksList(bookList: ArrayList<Book>) {
         makeProgressDialogInvisible()
         val rvBookList = findViewById<RecyclerView>(R.id.rv_books_list)
+        //verifying if the user has books in collection in the database
         if (bookList.size > 0) {
+            //if it has books, shows them
             rvBookList.visibility = View.VISIBLE
+            //and make default mesage not visible
             findViewById<TextView>(R.id.tv_no_books_in_collection).visibility = View.GONE
 
+            //creates a layout manager for the RecyclerView list
             rvBookList.layoutManager = LinearLayoutManager(this)
             findViewById<RecyclerView>(R.id.rv_books_list).setHasFixedSize(true)
 
+            //creates an adapter for the RecyclerView
             adapter = BookItemsAdapter(this, bookList)
             rvBookList.adapter = adapter
 
@@ -110,6 +119,7 @@ class MyBooksActivity : BaseActivity() {
                     return false
                 }
 
+                //can search by title, author, genre or isbn
                 override fun onQueryTextChange(newText: String): Boolean {
                     val searchList = ArrayList<Book>()
                     for (book in bookList) {
@@ -121,6 +131,8 @@ class MyBooksActivity : BaseActivity() {
                             searchList.add(book)
                         }
                     }
+
+                    //update the booklist
                     adapter.searchBookList(searchList)
                     return true
                 }
