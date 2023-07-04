@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputFilter
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -22,12 +23,13 @@ import com.example.mylibrary.R
 import com.example.mylibrary.database.RealTimeDataBase
 import com.example.mylibrary.models.Book
 import com.example.mylibrary.utils.Constants
+import com.example.mylibrary.utils.InputFilterMinMax
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
+
 
 class UpdateBookActivity : BaseActivity() {
 
@@ -36,6 +38,7 @@ class UpdateBookActivity : BaseActivity() {
     private lateinit var bookDetails: Book
     private var bookId: String = ""
     private var calendar = Calendar.getInstance()
+    private var fcalendar = Calendar.getInstance()
     private lateinit var dateSetListenerStartDate: DatePickerDialog.OnDateSetListener
     private lateinit var dateSetListenerFinishDate: DatePickerDialog.OnDateSetListener
 
@@ -64,23 +67,24 @@ class UpdateBookActivity : BaseActivity() {
                 updateDate(findViewById(R.id.et_add_start_reading_date))
             }
 
+
         //on clink on start reading field that it opens a picker
         findViewById<EditText>(R.id.et_add_start_reading_date).setOnClickListener {
             DatePickerDialog(
                 this@UpdateBookActivity,
                 dateSetListenerStartDate,
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
+                fcalendar.get(Calendar.YEAR),
+                fcalendar.get(Calendar.MONTH),
+                fcalendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
 
         //creates a date picker for finish reading date and sets the chosen date
         dateSetListenerFinishDate =
             DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                fcalendar.set(Calendar.YEAR, year)
+                fcalendar.set(Calendar.MONTH, month)
+                fcalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
                 updateDate(findViewById(R.id.et_add_finish_reading_date))
             }
 
@@ -208,6 +212,8 @@ class UpdateBookActivity : BaseActivity() {
         findViewById<EditText>(R.id.et_add_book_title).setText(book.title)
         findViewById<EditText>(R.id.et_add_book_author).setText(book.author)
         findViewById<RatingBar>(R.id.et_add_book_rate).rating = book.myRate
+        findViewById<EditText>(R.id.et_add_book_pages_read).filters =
+            arrayOf<InputFilter>(InputFilterMinMax("0", book.pages))
         findViewById<EditText>(R.id.et_add_book_pages_read).setText(book.pagesRead)
         findViewById<EditText>(R.id.et_add_start_reading_date).setText(book.startDate)
         findViewById<EditText>(R.id.et_add_finish_reading_date).setText(book.finishDate)
@@ -386,4 +392,7 @@ class UpdateBookActivity : BaseActivity() {
         }
         customDialog.show()
     }
+
+
+
 }

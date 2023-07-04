@@ -13,6 +13,7 @@ import com.example.mylibrary.utils.Constants
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
@@ -138,48 +139,53 @@ class RealTimeDataBase {
     fun getBookList(activity: Activity) {
         val userId = getCurrentUserID()
         val database = database.reference
+
         database.child(Constants.USER_BOOK).orderByChild(Constants.USERID).equalTo(userId)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val bookIds = snapshot.children.map { it.child(Constants.BOOKID).value as String? }.filterNotNull()
+
                     if (bookIds.isNotEmpty()) {
-                        database.child(Constants.BOOKS).orderByKey().startAt(bookIds.first())
-                            .endAt(bookIds.last()).addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(snapshot: DataSnapshot) {
-                                    val bookList: ArrayList<Book> = ArrayList()
-                                    snapshot.children.forEach { child ->
-                                        val book = child.getValue(Book::class.java) ?: return@forEach
-                                        book.documentId = child.key!!
-                                        bookList.add(book)
-                                    }
-                                    when(activity){
-                                        is MyBooksActivity ->activity.populatesBooksList(bookList)
-                                        is StatisticsActivity ->{
-                                            activity.populatePieChart(bookList)
-                                            activity.populateBarChart(bookList)
-                                            activity.setTheFavouriteBook(bookList)
-                                            activity.setNumberOfBooksFinished(bookList)
-                                        }
+                        val query = database.child(Constants.BOOKS).orderByKey()
+
+                        query.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val bookList: ArrayList<Book> = ArrayList()
+                                snapshot.children.forEach { child ->
+                                    if (child.key in bookIds) {
+                                        val book = child.getValue(Book::class.java)
+                                        book?.documentId = child.key!!
+                                        bookList.add(book!!)
                                     }
                                 }
-
-                                override fun onCancelled(error: DatabaseError) {
-                                    when(activity){
-                                        is MyBooksActivity ->activity.makeProgressDialogInvisible()
-                                        is StatisticsActivity ->activity.makeProgressDialogInvisible()
+                                when (activity) {
+                                    is MyBooksActivity -> activity.populatesBooksList(bookList)
+                                    is StatisticsActivity -> {
+                                        activity.populatePieChart(bookList)
+                                        activity.populateBarChart(bookList)
+                                        activity.setTheFavouriteBook(bookList)
+                                        activity.setNumberOfBooksFinished(bookList)
                                     }
-
-                                    Log.e(
-                                        activity.javaClass.simpleName,
-                                        "Error while getting the books for user",
-                                        error.toException()
-                                    )
                                 }
-                            })
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                when (activity) {
+                                    is MyBooksActivity -> activity.makeProgressDialogInvisible()
+                                    is StatisticsActivity -> activity.makeProgressDialogInvisible()
+                                }
+
+                                Log.e(
+                                    activity.javaClass.simpleName,
+                                    "Error while getting the books for user",
+                                    error.toException()
+                                )
+                            }
+                        })
                     } else {
-                        when(activity){
+                        when (activity) {
                             is MyBooksActivity -> activity.populatesBooksList(ArrayList())
-                            is StatisticsActivity ->{
+                            is StatisticsActivity -> {
                                 activity.populatePieChart(ArrayList())
                                 activity.populateBarChart(ArrayList())
                                 activity.setTheFavouriteBook(ArrayList())
@@ -190,15 +196,16 @@ class RealTimeDataBase {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    when(activity){
+                    when (activity) {
                         is MyBooksActivity -> activity.makeProgressDialogInvisible()
-                        is StatisticsActivity ->activity.makeProgressDialogInvisible()
+                        is StatisticsActivity -> activity.makeProgressDialogInvisible()
                     }
 
                     Log.e(activity.javaClass.simpleName, "Error while getting the books for user", error.toException())
                 }
             })
     }
+
 
 
     /**
@@ -217,7 +224,7 @@ class RealTimeDataBase {
 
                     // Update the rating and ISBN in the bookHashMap if necessary
                     if (bookHashMap["myRate"] == null) {
-                        bookHashMap["myRate"] = currentMyRate.toString().toDouble()
+                        bookHashMap["myRate"] = 0.0
                     } else {
                         bookHashMap["myRate"] = bookHashMap["myRate"].toString().toDouble()
                     }
@@ -397,6 +404,7 @@ class RealTimeDataBase {
         val userBookRef = database.getReference(Constants.USER_BOOK)
         val userId = getCurrentUserID()
 
+        // Check if the book already exists in the user's collection
         userBookRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(userBookSnapshot: DataSnapshot) {
                 if (userBookSnapshot.exists()) {
@@ -406,117 +414,11 @@ class RealTimeDataBase {
                         Toast.makeText(activity, "Book already in collection", Toast.LENGTH_SHORT).show()
                     } else {
                         // Book doesn't exist in the user's collection, add it to both BOOKS and USER_BOOKS
-                        archiveRef.child(archiveItemID).addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(archiveSnapshot: DataSnapshot) {
-                                if (!archiveSnapshot.exists()) {
-                                    Toast.makeText(activity, "Archive not found", Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-
-                                val bookData = archiveSnapshot.getValue(Archive::class.java)
-                                if (bookData == null) {
-                                    Toast.makeText(activity, "Book not found", Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-
-                                val bookKey = booksRef.push().key
-                                if (bookKey == null) {
-                                    Toast.makeText(activity, "Error creating book key", Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-
-                                // Add the book to the BOOKS collection
-                                booksRef.child(bookKey).setValue(bookData).addOnSuccessListener {
-                                    // Associate the book with the current user in the USER_BOOK table
-                                    val userBookData = hashMapOf(
-                                        "bookId" to bookKey,
-                                        "userId" to userId,
-                                        "myRate" to 0,
-                                        "isbn" to isbn
-                                    )
-                                    userBookRef.push().setValue(userBookData).addOnSuccessListener {
-                                        Toast.makeText(
-                                            activity,
-                                            "Book added successfully to collection",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }.addOnFailureListener { e ->
-                                        Toast.makeText(
-                                            activity,
-                                            "Error associating book with user: ${e.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }.addOnFailureListener { e ->
-                                    Toast.makeText(
-                                        activity,
-                                        "Error cloning book: ${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                Toast.makeText(activity, "Error reading archive: ${error.message}", Toast.LENGTH_SHORT).show()
-                            }
-                        })
+                        addBookToCollections(activity, archiveRef, booksRef, userBookRef, userId, archiveItemID, isbn)
                     }
                 } else {
                     // User has no books in the collection, add the book to both BOOKS and USER_BOOKS
-                    archiveRef.child(archiveItemID).addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(archiveSnapshot: DataSnapshot) {
-                            if (!archiveSnapshot.exists()) {
-                                Toast.makeText(activity, "Archive not found", Toast.LENGTH_SHORT).show()
-                                return
-                            }
-
-                            val bookData = archiveSnapshot.getValue(Archive::class.java)
-                            if (bookData == null) {
-                                Toast.makeText(activity, "Book not found", Toast.LENGTH_SHORT).show()
-                                return
-                            }
-
-                            val bookKey = booksRef.push().key
-                            if (bookKey == null) {
-                                Toast.makeText(activity, "Error creating book key", Toast.LENGTH_SHORT).show()
-                                return
-                            }
-
-                            // Add the book to the BOOKS collection
-                            booksRef.child(bookKey).setValue(bookData).addOnSuccessListener {
-                                // Associate the book with the current user in the USER_BOOK table
-                                val userBookData = hashMapOf(
-                                    "bookId" to bookKey,
-                                    "userId" to userId,
-                                    "myRate" to 0,
-                                    "isbn" to isbn
-                                )
-                                userBookRef.push().setValue(userBookData).addOnSuccessListener {
-                                    Toast.makeText(
-                                        activity,
-                                        "Book added successfully to collection",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }.addOnFailureListener { e ->
-                                    Toast.makeText(
-                                        activity,
-                                        "Error associating book with user: ${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }.addOnFailureListener { e ->
-                                Toast.makeText(
-                                    activity,
-                                    "Error cloning book: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            Toast.makeText(activity, "Error reading archive: ${error.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    })
+                    addBookToCollections(activity, archiveRef, booksRef, userBookRef, userId, archiveItemID, isbn)
                 }
             }
 
@@ -526,6 +428,66 @@ class RealTimeDataBase {
         })
     }
 
+    private fun addBookToCollections(
+        activity: Activity,
+        archiveRef: DatabaseReference,
+        booksRef: DatabaseReference,
+        userBookRef: DatabaseReference,
+        userId: String,
+        archiveItemID: String,
+        isbn: String
+    ) {
+        archiveRef.child(archiveItemID).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(archiveSnapshot: DataSnapshot) {
+                if (!archiveSnapshot.exists()) {
+                    Toast.makeText(activity, "Archive not found", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val bookData = archiveSnapshot.getValue(Archive::class.java)
+                if (bookData == null) {
+                    Toast.makeText(activity, "Book not found", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val bookKey = booksRef.push().key
+                if (bookKey == null) {
+                    Toast.makeText(activity, "Error creating book key", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // Add the book to the BOOKS collection
+                booksRef.child(bookKey).setValue(bookData).addOnSuccessListener {
+                    // Associate the book with the current user in the USER_BOOK table
+                    val userBookData = hashMapOf(
+                        "bookId" to bookKey,
+                        "userId" to userId,
+                        "myRate" to 0,
+                        "isbn" to isbn
+                    )
+                    val userBookKey = userBookRef.push().key
+                    if (userBookKey == null) {
+                        Toast.makeText(activity, "Error creating user book key", Toast.LENGTH_SHORT).show()
+                        return@addOnSuccessListener
+                    }
+                    val userBookUpdates = hashMapOf<String, Any>(
+                        "/$userBookKey" to userBookData
+                    )
+                    userBookRef.updateChildren(userBookUpdates).addOnSuccessListener {
+                        Toast.makeText(activity, "Book added successfully to collection", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener { e ->
+                        Toast.makeText(activity, "Error associating book with user: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }.addOnFailureListener { e ->
+                    Toast.makeText(activity, "Error cloning book: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(activity, "Error reading archive: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 
     /**

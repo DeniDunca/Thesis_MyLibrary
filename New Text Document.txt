@@ -1,0 +1,10 @@
+testez pe date random pt un user  careavea date bune si dupa sa vad daca s a schimbat
+intersectia dintre ce zice modelul si ce zic re
+utilizator normal -> regulile mele
+utilizator cu alte reguli
+anntrenare pt alt utilizator
+daca userul are 20 de carti - o sa fie 0 recomandari?
+diagrama de secventa la model -> pana la interfata
+
+recomandarile dupa antrenare si inainte
+
