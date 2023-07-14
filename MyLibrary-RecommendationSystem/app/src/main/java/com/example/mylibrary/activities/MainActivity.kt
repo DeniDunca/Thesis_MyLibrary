@@ -276,7 +276,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
             callback(prediction)
         } else {
             //download the model from Firebase Machine Learning
-            val conditions = CustomModelDownloadConditions.Builder().requireWifi().build()
+            val conditions = CustomModelDownloadConditions.Builder().build()
             FirebaseModelDownloader.getInstance()
                 .getModel("final_model", DownloadType.LATEST_MODEL, conditions)
                 .addOnSuccessListener { model: CustomModel? ->

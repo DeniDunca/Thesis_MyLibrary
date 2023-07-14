@@ -38,7 +38,6 @@ class UpdateBookActivity : BaseActivity() {
     private lateinit var bookDetails: Book
     private var bookId: String = ""
     private var calendar = Calendar.getInstance()
-    private var fcalendar = Calendar.getInstance()
     private lateinit var dateSetListenerStartDate: DatePickerDialog.OnDateSetListener
     private lateinit var dateSetListenerFinishDate: DatePickerDialog.OnDateSetListener
 
@@ -73,18 +72,18 @@ class UpdateBookActivity : BaseActivity() {
             DatePickerDialog(
                 this@UpdateBookActivity,
                 dateSetListenerStartDate,
-                fcalendar.get(Calendar.YEAR),
-                fcalendar.get(Calendar.MONTH),
-                fcalendar.get(Calendar.DAY_OF_MONTH)
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
             ).show()
         }
 
         //creates a date picker for finish reading date and sets the chosen date
         dateSetListenerFinishDate =
             DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
-                fcalendar.set(Calendar.YEAR, year)
-                fcalendar.set(Calendar.MONTH, month)
-                fcalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
                 updateDate(findViewById(R.id.et_add_finish_reading_date))
             }
 
